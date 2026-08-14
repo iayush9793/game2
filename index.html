@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>For My Dearest Richa 💖 | Romantic Bubble Shooter</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Fredoka & Nunito for maximum cuteness -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti Library for Victory Fireworks -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        html, body {
+            touch-action: manipulation;
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #fff0f5 0%, #ffe6ea 40%, #f3e8ff 100%);
+            color: #4a3b4e;
+        }
+
+        h1, h2, h3, .font-cute {
+            font-family: 'Fredoka', cursive;
+        }
+
+        /* Glassmorphism containers */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 10px 30px rgba(255, 182, 193, 0.28);
+        }
+
+        /* Soft romantic button styling */
+        .btn-cute {
+            background: linear-gradient(135deg, #ff8da1 0%, #ff6b8b 100%);
+            color: white;
+            box-shadow: 0 6px 18px rgba(255, 107, 139, 0.35);
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-cute:active {
+            transform: scale(0.96);
+            box-shadow: 0 3px 10px rgba(255, 107, 139, 0.4);
+        }
+
+        .btn-secondary-cute {
+            background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+            color: white;
+            box-shadow: 0 6px 18px rgba(139, 92, 246, 0.3);
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-secondary-cute:active {
+            transform: scale(0.96);
+        }
+
+        /* Animations */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(4deg); }
+        }
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 6px rgba(255, 107, 139, 0.4)); }
+            50% { transform: scale(1.08); filter: drop-shadow(0 0 14px rgba(255, 107, 139, 0.7)); }
+        }
+        @keyframes bounceGentle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        .animate-float { animation: floatSlow 5s ease-in-out infinite; }
+        .animate-pulse-glow { animation: pulseGlow 2.5s ease-in-out infinite; }
+        .animate-bounce-gentle { animation: bounceGentle 2s ease-in-out infinite; }
+
+        /* Canvas game area */
+        #gameCanvas {
+            touch-action: none;
+            background: linear-gradient(180deg, #fff5f7 0%, #f7f3ff 100%);
+            border-radius: 1.25rem;
+        }
+
+        /* Floating background heart particles */
+        .heart-particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 0;
+            animation: floatUp 8s linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) scale(0.5) rotate(0deg);
+                opacity: 0;
+            }
+            15% { opacity: 0.8; }
+            85% { opacity: 0.8; }
+            100% {
+                transform: translateY(-10vh) scale(1.2) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 3D Flip Card */
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+        .flipped { transform: rotateY(180deg); }
+        .backface-hidden { backface-visibility: hidden; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-between relative selection:bg-pink-200 selection:text-pink-800">
+
+    <div id="heartContainer" class="fixed inset-0 pointer-events-none z-0 overflow-hidden"></div>
+
+    <header class="w-full max-w-lg px-4 pt-4 pb-1 text-center z-10">
+        <div class="inline-flex items-center gap-1.5 bg-pink-100/90 border border-pink-300 text-pink-700 px-3 py-1 rounded-full text-xs font-bold mb-2 shadow-sm animate-bounce-gentle">
+            <span>✨ A Special Surprise For Richa ✨</span>
+        </div>
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-pink-600 tracking-wide drop-shadow-sm flex items-center justify-center gap-2 flex-wrap">
+            <span>For My Dearest Richa</span>
+            <span class="inline-block animate-pulse-glow">💖</span>
+        </h1>
+        <p class="mt-1.5 text-xs sm:text-sm text-purple-700 font-semibold max-w-md mx-auto px-2">
+            You bring pandas, teddy hugs, and infinite warmth into my life! 🐼🧸✨
+        </p>
+    </header>
+
+    <section class="w-full max-w-lg px-3 py-2 z-10">
+        <div class="glass-card rounded-2xl p-3.5 mb-2">
+            <div class="flex items-center justify-between mb-2.5">
+                <h2 class="text-base sm:text-lg font-bold text-pink-600 flex items-center gap-1.5">
+                    <span>🐼</span> Reasons Why I Love You <span>🧸</span>
+                </h2>
+                <span class="text-[10px] sm:text-xs bg-pink-200 text-pink-800 px-2.5 py-0.5 rounded-full font-bold">Tap cards!</span>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-2">
+                <!-- Card 1 -->
+                <div class="perspective-1000 h-32 cursor-pointer" onclick="toggleCard(this)">
+                    <div class="card-inner relative w-full h-full transform-style-3d rounded-xl shadow-sm border border-pink-200 bg-gradient-to-br from-pink-100 to-rose-50 flex items-center justify-center p-2 text-center">
+                        <div class="absolute inset-0 backface-hidden flex flex-col items-center justify-center p-1.5">
+                            <span class="text-2xl mb-1">🐼</span>
+                            <span class="font-bold text-pink-700 text-xs leading-tight">Cute Panda Vibes</span>
+                        </div>
+                        <div class="absolute inset-0 backface-hidden [transform:rotateY(180deg)] bg-pink-500 text-white rounded-xl flex items-center justify-center p-2 text-[11px] font-semibold leading-tight">
+                            "You are as adorable and precious as a squishy little panda! 💕"
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="perspective-1000 h-32 cursor-pointer" onclick="toggleCard(this)">
+                    <div class="card-inner relative w-full h-full transform-style-3d rounded-xl shadow-sm border border-purple-200 bg-gradient-to-br from-purple-100 to-pink-50 flex items-center justify-center p-2 text-center">
+                        <div class="absolute inset-0 backface-hidden flex flex-col items-center justify-center p-1.5">
+                            <span class="text-2xl mb-1">🧸</span>
+                            <span class="font-bold text-purple-700 text-xs leading-tight">Teddy Hugs</span>
+                        </div>
+                        <div class="absolute inset-0 backface-hidden [transform:rotateY(180deg)] bg-purple-500 text-white rounded-xl flex items-center justify-center p-2 text-[11px] font-semibold leading-tight">
+                            "Your hugs make all my worries vanish. You are home. 🥰"
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="perspective-1000 h-32 cursor-pointer" onclick="toggleCard(this)">
+                    <div class="card-inner relative w-full h-full transform-style-3d rounded-xl shadow-sm border border-rose-200 bg-gradient-to-br from-rose-100 to-amber-50 flex items-center justify-center p-2 text-center">
+                        <div class="absolute inset-0 backface-hidden flex flex-col items-center justify-center p-1.5">
+                            <span class="text-2xl mb-1">👑</span>
+                            <span class="font-bold text-rose-700 text-xs leading-tight">My Queen</span>
+                        </div>
+                        <div class="absolute inset-0 backface-hidden [transform:rotateY(180deg)] bg-rose-500 text-white rounded-xl flex items-center justify-center p-2 text-[11px] font-semibold leading-tight">
+                            "You win my heart over and over again every single day! 💘"
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="w-full max-w-lg px-3 pb-6 z-10 flex flex-col items-center">
+        <div class="glass-card rounded-2xl p-3 sm:p-4 w-full relative">
+            
+            <!-- Game Header Bar -->
+            <div class="flex items-center justify-between mb-2 px-1">
+                <div class="flex items-center gap-1.5">
+                    <span class="text-xl">🧸</span>
+                    <div>
+                        <div class="text-[10px] text-gray-500 uppercase font-bold tracking-wider leading-none">Score</div>
+                        <div id="scoreDisplay" class="text-xl font-bold text-pink-600 font-cute leading-none mt-0.5">0</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <!-- Sound Toggle -->
+                    <button id="soundBtn" onclick="toggleSound()" class="w-9 h-9 rounded-full bg-pink-100 hover:bg-pink-200 text-pink-700 transition flex items-center justify-center" title="Toggle Sound">
+                        <svg id="soundIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M11 5L6 9H2v6h4l5 4V5z"/>
+                        </svg>
+                    </button>
+                    <!-- Restart Button -->
+                    <button onclick="resetGame()" class="btn-cute px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1 min-h-[38px]">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        <span>Restart</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile-Friendly Tip -->
+            <div class="bg-pink-50 border border-pink-200 rounded-lg py-1.5 px-2 mb-2 text-center text-[11px] sm:text-xs text-pink-800 flex items-center justify-center gap-1">
+                <span>🎯 <strong>Tap/Drag</strong> anywhere on board to aim & shoot bubbles!</span>
+            </div>
+
+            <!-- Game Canvas Container -->
+            <div class="relative w-full aspect-[4/5] flex justify-center items-center overflow-hidden rounded-xl border border-pink-100 shadow-inner">
+                <canvas id="gameCanvas" width="400" height="500" class="w-full h-full block select-none"></canvas>
+            </div>
+
+            <!-- Footer indicator -->
+            <div class="mt-2.5 flex items-center justify-between px-3 py-1.5 bg-white/70 rounded-xl border border-pink-100">
+                <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-bold text-purple-700">Next:</span>
+                    <div id="nextBubblePreview" class="w-6 h-6 rounded-full flex items-center justify-center text-xs shadow-sm border border-white">
+                        🐼
+                    </div>
+                </div>
+                <div class="text-xs font-semibold text-pink-600 flex items-center gap-1">
+                    <span>Remaining:</span>
+                    <span id="remainingBubbles" class="font-bold text-xs text-pink-800">0</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="victoryModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 bg-purple-950/60 backdrop-blur-md hidden transition-opacity duration-300">
+        <div class="glass-card bg-white/95 rounded-3xl p-5 sm:p-7 max-w-sm w-full text-center relative shadow-2xl border-4 border-pink-300 transform scale-95 transition-transform duration-300" id="victoryContent">
+            
+            <div class="flex justify-center items-center gap-3 text-4xl mb-1 animate-bounce-gentle">
+                <span>🐼</span>
+                <span class="text-pink-500 animate-pulse">💖</span>
+                <span>🧸</span>
+            </div>
+
+            <div class="inline-block bg-pink-100 text-pink-800 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full mb-1.5 uppercase tracking-widest">
+                Mission Complete!
+            </div>
+
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-pink-600 mb-1 font-cute drop-shadow-sm">
+                I LOVE YOU, RICHA ❤️
+            </h2>
+
+            <p class="text-sm sm:text-base text-purple-800 font-bold mb-3">
+                You won my heart too! 🐼🧸💕
+            </p>
+
+            <div class="bg-gradient-to-r from-pink-50 via-purple-50 to-pink-50 p-3 rounded-xl border border-pink-200 text-xs text-gray-700 mb-4 leading-relaxed shadow-inner">
+                "No matter how many bubbles pop, my love for you keeps growing endlessly. You are my favorite person, my cuddliest panda, and my forever teddy bear!"
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <button onclick="closeVictoryModal(); resetGame();" class="btn-cute w-full py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5 min-h-[44px]">
+                    <span>Play Again With Me 💖</span>
+                </button>
+                <button onclick="triggerConfettiBurst()" class="btn-secondary-cute w-full py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 min-h-[40px]">
+                    <span>✨ Shower Hearts & Confetti ✨</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="w-full text-center py-3 text-[11px] sm:text-xs font-semibold text-pink-700 z-10">
+        Made with infinite love for Richa 🐼🧸 • Forever & Always 💕
+    </footer>
+
+    <script>
+        let audioCtx = null;
+        let soundEnabled = true;
+
+        // Background Audio 1.mp3 setup
+        const bgMusic = new Audio('1.mp3');
+        bgMusic.loop = true;
+        let bgMusicStarted = false;
+
+        function startBgMusic() {
+            if (!bgMusicStarted) {
+                bgMusic.play().then(() => {
+                    bgMusicStarted = true;
+                }).catch((e) => {
+                    console.log("Autoplay waiting for user gesture:", e);
+                });
+            }
+        }
+
+        // Voice Synthesis: "Ayush Loves Richa"
+        function speakLoveMessage() {
+            if (!soundEnabled) return;
+            if ('speechSynthesis' in window) {
+                // Cancel active utterances to avoid queued delays on rapid taps
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance("Ayush Loves Richa");
+                utterance.pitch = 1.2; // Slightly higher pitch for a sweet tone
+                utterance.rate = 0.95;  // Expressive speed
+                utterance.volume = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Attempt background music playback immediately
+        startBgMusic();
+
+        // Global touch/click listener to start audio on initial user interaction (for browser autoplay compliance)
+        function handleFirstInteraction() {
+            startBgMusic();
+            document.removeEventListener('click', handleFirstInteraction);
+            document.removeEventListener('touchstart', handleFirstInteraction);
+        }
+        document.addEventListener('click', handleFirstInteraction);
+        document.addEventListener('touchstart', handleFirstInteraction);
+
+        function initAudio() {
+            startBgMusic();
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function toggleSound() {
+            speakLoveMessage();
+            soundEnabled = !soundEnabled;
+            const soundIcon = document.getElementById('soundIcon');
+            if (soundEnabled) {
+                bgMusic.play().catch(() => {});
+                soundIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M11 5L6 9H2v6h4l5 4V5z"/>`;
+            } else {
+                bgMusic.pause();
+                window.speechSynthesis && window.speechSynthesis.cancel();
+                soundIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" clip-rule="evenodd"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>`;
+            }
+        }
+
+        function playPopSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(450 + Math.random() * 200, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(90, audioCtx.currentTime + 0.1);
+
+                gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.1);
+            } catch (e) {
+                console.log(e);
+            }
+        }
+
+        function playShootSound() {
+            if (!soundEnabled) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(650, audioCtx.currentTime + 0.12);
+
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.12);
+            } catch (e) {
+                console.log(e);
+            }
+        }
+
+        function playWinFanfare() {
+            if (!soundEnabled) return;
+            initAudio();
+            speakLoveMessage();
+            if (!audioCtx) return;
+
+            try {
+                const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99];
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.1);
+
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime + idx * 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + idx * 0.1 + 0.3);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc.start(audioCtx.currentTime + idx * 0.1);
+                    osc.stop(audioCtx.currentTime + idx * 0.1 + 0.3);
+                });
+            } catch(e) {
+                console.log(e);
+            }
+        }
+
+        function toggleCard(cardElem) {
+            initAudio();
+            speakLoveMessage();
+            const inner = cardElem.querySelector('.card-inner');
+            inner.classList.toggle('flipped');
+            playPopSound();
+        }
+
+        function createFloatingHearts() {
+            const container = document.getElementById('heartContainer');
+            const heartIcons = ['💖', '💕', '🧸', '🐼', '💗', '✨', '🌸'];
+            
+            for (let i = 0; i < 16; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart-particle';
+                heart.innerText = heartIcons[Math.floor(Math.random() * heartIcons.length)];
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDuration = (6 + Math.random() * 5) + 's';
+                heart.style.animationDelay = (Math.random() * 5) + 's';
+                heart.style.fontSize = (14 + Math.random() * 16) + 'px';
+                container.appendChild(heart);
+            }
+        }
+        createFloatingHearts();
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const BUBBLE_TYPES = [
+            { id: 'panda', color: '#333333', bgGradient: ['#ffffff', '#e2e8f0'], emoji: '🐼', name: 'Panda' },
+            { id: 'teddy', color: '#8d5b4c', bgGradient: ['#ffedd5', '#fed7aa'], emoji: '🧸', name: 'Teddy' },
+            { id: 'heart', color: '#e11d48', bgGradient: ['#ffe4e6', '#fecdd3'], emoji: '💖', name: 'Heart' },
+            { id: 'star', color: '#d97706', bgGradient: ['#fef3c7', '#fde68a'], emoji: '⭐', name: 'Star' },
+            { id: 'flower', color: '#9333ea', bgGradient: ['#f3e8ff', '#e9d5ff'], emoji: '🌸', name: 'Flower' }
+        ];
+
+        let gridRows = 9;
+        let gridCols = 8;
+        let bubbleRadius = 22;
+        let grid = [];
+        let score = 0;
+
+        let currentShooterBubble = null;
+        let nextShooterBubble = null;
+        let activeBullet = null;
+        let aimAngle = -Math.PI / 2;
+        let isGameWon = false;
+        let isShooting = false;
+
+        class Bubble {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.type = type;
+                this.row = -1;
+                this.col = -1;
+                this.vx = 0;
+                this.vy = 0;
+            }
+
+            draw(context) {
+                context.save();
+                context.translate(this.x, this.y);
+
+                // Outer glossy gradient
+                context.beginPath();
+                context.arc(0, 0, bubbleRadius, 0, Math.PI * 2);
+                const grad = context.createRadialGradient(-bubbleRadius * 0.3, -bubbleRadius * 0.3, 2, 0, 0, bubbleRadius);
+                grad.addColorStop(0, '#ffffff');
+                grad.addColorStop(0.4, this.type.bgGradient[0]);
+                grad.addColorStop(1, this.type.bgGradient[1]);
+                context.fillStyle = grad;
+                context.shadowColor = 'rgba(255, 182, 193, 0.4)';
+                context.shadowBlur = 5;
+                context.fill();
+
+                // Outer stroke
+                context.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+                context.lineWidth = 2;
+                context.stroke();
+
+                // Inner Emoji
+                context.font = `${bubbleRadius * 1.1}px Nunito, sans-serif`;
+                context.textAlign = 'center';
+                context.textBaseline = 'middle';
+                context.shadowBlur = 0;
+                context.fillText(this.type.emoji, 0, 1);
+
+                // Shine curve
+                context.beginPath();
+                context.arc(-bubbleRadius * 0.35, -bubbleRadius * 0.35, bubbleRadius * 0.35, Math.PI * 1.1, Math.PI * 1.8);
+                context.strokeStyle = 'rgba(255, 255, 255, 0.75)';
+                context.lineWidth = 2.5;
+                context.stroke();
+
+                context.restore();
+            }
+        }
+
+        function getGridTilePosition(row, col) {
+            const xOffset = (row % 2 === 1) ? bubbleRadius : 0;
+            const x = bubbleRadius + col * (bubbleRadius * 2) + xOffset + 12;
+            const y = bubbleRadius + row * (bubbleRadius * 1.732) + 12;
+            return { x, y };
+        }
+
+        function initGrid() {
+            grid = [];
+            const initialRows = 5;
+            for (let r = 0; r < gridRows; r++) {
+                grid[r] = [];
+                const colsInRow = (r % 2 === 1) ? gridCols - 1 : gridCols;
+                for (let c = 0; c < colsInRow; c++) {
+                    if (r < initialRows) {
+                        const randomType = BUBBLE_TYPES[Math.floor(Math.random() * BUBBLE_TYPES.length)];
+                        const pos = getGridTilePosition(r, c);
+                        const b = new Bubble(pos.x, pos.y, randomType);
+                        b.row = r;
+                        b.col = c;
+                        grid[r][c] = b;
+                    } else {
+                        grid[r][c] = null;
+                    }
+                }
+            }
+            updateRemainingCount();
+        }
+
+        function getRandomBubbleType() {
+            const activeTypes = new Set();
+            for (let r = 0; r < gridRows; r++) {
+                for (let c = 0; c < grid[r].length; c++) {
+                    if (grid[r][c]) {
+                        activeTypes.add(grid[r][c].type);
+                    }
+                }
+            }
+            const typeArray = Array.from(activeTypes);
+            if (typeArray.length > 0) {
+                return typeArray[Math.floor(Math.random() * typeArray.length)];
+            }
+            return BUBBLE_TYPES[Math.floor(Math.random() * BUBBLE_TYPES.length)];
+        }
+
+        function prepareShooter() {
+            if (!nextShooterBubble) {
+                nextShooterBubble = new Bubble(0, 0, getRandomBubbleType());
+            }
+            currentShooterBubble = nextShooterBubble;
+            currentShooterBubble.x = canvas.width / 2;
+            currentShooterBubble.y = canvas.height - 38;
+
+            nextShooterBubble = new Bubble(0, 0, getRandomBubbleType());
+
+            const previewEl = document.getElementById('nextBubblePreview');
+            previewEl.innerText = nextShooterBubble.type.emoji;
+            previewEl.style.backgroundColor = nextShooterBubble.type.bgGradient[0];
+        }
+
+        function getNeighbors(row, col) {
+            const neighbors = [];
+            const isOdd = (row % 2 === 1);
+            
+            const offsets = isOdd ? [
+                { r: -1, c: 0 }, { r: -1, c: 1 },
+                { r: 0, c: -1 }, { r: 0, c: 1 },
+                { r: 1, c: 0 }, { r: 1, c: 1 }
+            ] : [
+                { r: -1, c: -1 }, { r: -1, c: 0 },
+                { r: 0, c: -1 }, { r: 0, c: 1 },
+                { r: 1, c: -1 }, { r: 1, c: 0 }
+            ];
+
+            offsets.forEach(off => {
+                const nr = row + off.r;
+                const nc = col + off.c;
+                if (nr >= 0 && nr < gridRows) {
+                    const colsInRow = (nr % 2 === 1) ? gridCols - 1 : gridCols;
+                    if (nc >= 0 && nc < colsInRow) {
+                        neighbors.push({ r: nr, c: nc });
+                    }
+                }
+            });
+            return neighbors;
+        }
+
+        function snapToGrid(bullet) {
+            let closestSpot = null;
+            let minDistance = Infinity;
+
+            for (let r = 0; r < gridRows; r++) {
+                const colsInRow = (r % 2 === 1) ? gridCols - 1 : gridCols;
+                for (let c = 0; c < colsInRow; c++) {
+                    if (!grid[r][c]) {
+                        const pos = getGridTilePosition(r, c);
+                        const dist = Math.hypot(bullet.x - pos.x, bullet.y - pos.y);
+                        if (dist < minDistance) {
+                            minDistance = dist;
+                            closestSpot = { r, c, pos };
+                        }
+                    }
+                }
+            }
+
+            if (closestSpot) {
+                const { r, c, pos } = closestSpot;
+                bullet.x = pos.x;
+                bullet.y = pos.y;
+                bullet.row = r;
+                bullet.col = c;
+                grid[r][c] = bullet;
+
+                processMatches(r, c, bullet.type);
+            }
+        }
+
+        function processMatches(startRow, startCol, matchType) {
+            const matched = [];
+            const queue = [{ r: startRow, c: startCol }];
+            const visited = new Set();
+            visited.add(`${startRow},${startCol}`);
+
+            while (queue.length > 0) {
+                const curr = queue.shift();
+                matched.push(curr);
+
+                const neighbors = getNeighbors(curr.r, curr.c);
+                neighbors.forEach(n => {
+                    const key = `${n.r},${n.c}`;
+                    if (!visited.has(key)) {
+                        visited.add(key);
+                        const nBubble = grid[n.r][n.c];
+                        if (nBubble && nBubble.type.id === matchType.id) {
+                            queue.push(n);
+                        }
+                    }
+                });
+            }
+
+            if (matched.length >= 3) {
+                playPopSound();
+                matched.forEach(spot => {
+                    grid[spot.r][spot.c] = null;
+                });
+                score += matched.length * 20;
+                document.getElementById('scoreDisplay').innerText = score;
+
+                dropFloatingBubbles();
+            }
+
+            updateRemainingCount();
+            checkWinCondition();
+        }
+
+        function dropFloatingBubbles() {
+            const connectedToTop = new Set();
+            const queue = [];
+
+            for (let c = 0; c < gridCols; c++) {
+                if (grid[0][c]) {
+                    queue.push({ r: 0, c });
+                    connectedToTop.add(`0,${c}`);
+                }
+            }
+
+            while (queue.length > 0) {
+                const curr = queue.shift();
+                const neighbors = getNeighbors(curr.r, curr.c);
+                neighbors.forEach(n => {
+                    const key = `${n.r},${n.c}`;
+                    if (!connectedToTop.has(key) && grid[n.r][n.c]) {
+                        connectedToTop.add(key);
+                        queue.push(n);
+                    }
+                });
+            }
+
+            let droppedCount = 0;
+            for (let r = 0; r < gridRows; r++) {
+                const colsInRow = (r % 2 === 1) ? gridCols - 1 : gridCols;
+                for (let c = 0; c < colsInRow; c++) {
+                    if (grid[r][c] && !connectedToTop.has(`${r},${c}`)) {
+                        grid[r][c] = null;
+                        droppedCount++;
+                    }
+                }
+            }
+
+            if (droppedCount > 0) {
+                score += droppedCount * 30;
+                document.getElementById('scoreDisplay').innerText = score;
+            }
+        }
+
+        function updateRemainingCount() {
+            let count = 0;
+            for (let r = 0; r < gridRows; r++) {
+                for (let c = 0; c < grid[r].length; c++) {
+                    if (grid[r][c]) count++;
+                }
+            }
+            document.getElementById('remainingBubbles').innerText = count;
+            return count;
+        }
+
+        function checkWinCondition() {
+            const remaining = updateRemainingCount();
+            if (remaining === 0 && !isGameWon) {
+                isGameWon = true;
+                playWinFanfare();
+                setTimeout(() => {
+                    showVictoryModal();
+                }, 350);
+            }
+        }
+
+        function showVictoryModal() {
+            const modal = document.getElementById('victoryModal');
+            const content = document.getElementById('victoryContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+
+            triggerConfettiBurst();
+        }
+
+        function closeVictoryModal() {
+            const modal = document.getElementById('victoryModal');
+            modal.classList.add('hidden');
+        }
+
+        function triggerConfettiBurst() {
+            if (window.confetti) {
+                confetti({
+                    particleCount: 110,
+                    spread: 80,
+                    origin: { y: 0.6 },
+                    colors: ['#ff6b8b', '#a78bfa', '#fde68a', '#ffffff']
+                });
+            }
+        }
+
+        function shootBubble() {
+            if (isShooting || activeBullet || isGameWon) return;
+
+            initAudio();
+            speakLoveMessage();
+            playShootSound();
+
+            isShooting = true;
+            activeBullet = currentShooterBubble;
+            const speed = 14;
+            activeBullet.vx = Math.cos(aimAngle) * speed;
+            activeBullet.vy = Math.sin(aimAngle) * speed;
+        }
+
+        function updateBullet() {
+            if (!activeBullet) return;
+
+            activeBullet.x += activeBullet.vx;
+            activeBullet.y += activeBullet.vy;
+
+            // Bounce off left/right side walls
+            if (activeBullet.x - bubbleRadius <= 0) {
+                activeBullet.x = bubbleRadius;
+                activeBullet.vx = -activeBullet.vx;
+            } else if (activeBullet.x + bubbleRadius >= canvas.width) {
+                activeBullet.x = canvas.width - bubbleRadius;
+                activeBullet.vx = -activeBullet.vx;
+            }
+
+            // Top ceiling collision
+            if (activeBullet.y - bubbleRadius <= 0) {
+                snapToGrid(activeBullet);
+                activeBullet = null;
+                isShooting = false;
+                prepareShooter();
+                return;
+            }
+
+            // Collision detection with grid bubbles
+            for (let r = 0; r < gridRows; r++) {
+                const colsInRow = (r % 2 === 1) ? gridCols - 1 : gridCols;
+                for (let c = 0; c < colsInRow; c++) {
+                    const b = grid[r][c];
+                    if (b) {
+                        const dist = Math.hypot(activeBullet.x - b.x, activeBullet.y - b.y);
+                        if (dist < bubbleRadius * 1.75) {
+                            snapToGrid(activeBullet);
+                            activeBullet = null;
+                            isShooting = false;
+                            prepareShooter();
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        function resizeCanvas() {
+            canvas.width = 400;
+            canvas.height = 500;
+        }
+
+        function drawTrajectory() {
+            if (isShooting || !currentShooterBubble) return;
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.setLineDash([5, 5]);
+            ctx.strokeStyle = 'rgba(255, 107, 139, 0.65)';
+            ctx.lineWidth = 3;
+
+            let startX = currentShooterBubble.x;
+            let startY = currentShooterBubble.y;
+            ctx.moveTo(startX, startY);
+
+            let rayX = startX;
+            let rayY = startY;
+            let dirX = Math.cos(aimAngle);
+            let dirY = Math.sin(aimAngle);
+
+            for (let step = 0; step < 280; step += 8) {
+                rayX += dirX * 8;
+                rayY += dirY * 8;
+
+                if (rayX - bubbleRadius <= 5 || rayX + bubbleRadius >= canvas.width - 5) {
+                    dirX = -dirX;
+                }
+                if (rayY <= 15) break;
+
+                ctx.lineTo(rayX, rayY);
+            }
+
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Platform base arc
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, canvas.height - 38, bubbleRadius * 1.6, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255, 182, 193, 0.8)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.restore();
+
+            drawTrajectory();
+
+            // Draw grid
+            for (let r = 0; r < gridRows; r++) {
+                const colsInRow = (r % 2 === 1) ? gridCols - 1 : gridCols;
+                for (let c = 0; c < colsInRow; c++) {
+                    if (grid[r][c]) {
+                        grid[r][c].draw(ctx);
+                    }
+                }
+            }
+
+            // Draw shooter bubble
+            if (currentShooterBubble && !activeBullet) {
+                currentShooterBubble.draw(ctx);
+            }
+
+            // Draw flying bullet
+            if (activeBullet) {
+                activeBullet.draw(ctx);
+            }
+
+            updateBullet();
+            requestAnimationFrame(render);
+        }
+
+        function updateAim(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            const mouseX = (clientX - rect.left) * scaleX;
+            const mouseY = (clientY - rect.top) * scaleY;
+
+            const shooterX = canvas.width / 2;
+            const shooterY = canvas.height - 38;
+
+            let angle = Math.atan2(mouseY - shooterY, mouseX - shooterX);
+
+            // Clamp launcher angle
+            if (angle > -Math.PI * 0.08) angle = -Math.PI * 0.08;
+            if (angle < -Math.PI * 0.92) angle = -Math.PI * 0.92;
+
+            aimAngle = angle;
+        }
+
+        // Mouse events
+        canvas.addEventListener('mousemove', (e) => {
+            updateAim(e.clientX, e.clientY);
+        });
+
+        canvas.addEventListener('click', (e) => {
+            updateAim(e.clientX, e.clientY);
+            shootBubble();
+        });
+
+        // Touch events optimized for mobile phones
+        canvas.addEventListener('touchstart', (e) => {
+            initAudio();
+            if (e.touches.length > 0) {
+                updateAim(e.touches[0].clientX, e.touches[0].clientY);
+            }
+            e.preventDefault();
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                updateAim(e.touches[0].clientX, e.touches[0].clientY);
+            }
+            e.preventDefault();
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            if (e.changedTouches.length > 0) {
+                updateAim(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+            }
+            shootBubble();
+            e.preventDefault();
+        }, { passive: false });
+
+        function resetGame() {
+            speakLoveMessage();
+            score = 0;
+            isGameWon = false;
+            isShooting = false;
+            activeBullet = null;
+            document.getElementById('scoreDisplay').innerText = '0';
+            closeVictoryModal();
+            initGrid();
+            prepareShooter();
+        }
+
+        // Initialize on Load
+        window.onload = function () {
+            startBgMusic();
+            resizeCanvas();
+            initGrid();
+            prepareShooter();
+            requestAnimationFrame(render);
+        };
+    </script>
+</body>
+</html>
